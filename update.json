@@ -1,7 +1,7 @@
 ﻿{
-    "url":  "https://github.com/Nando-Alhasanain/POS/releases/download/v0.1.0/POS.TOKO_0.1.0_x64-setup.exe",
-    "pub_date":  "2026-07-12T12:00:47Z",
-    "version":  "0.1.0",
-    "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRTEM0ZWU5Q1krN1VwOU8xanFoWldqSmVZS3I0UllhUHhyUGtEQ1FPdDdvUU1sWnhHaEt0MXdjUnVxRnAraWlWUmw0N0kyQ0lDSnAzRmRjVGJYNUZ4VXpUN3ZIeFJBVVFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzODMyNDAzCWZpbGU6UE9TIFRPS09fMC4xLjBfeDY0LXNldHVwLmV4ZQpsWEltUU9WS3Q4RUMwcm4rWXRGVFpIWk1EVHhBV0dYVlh2K0FySTlkWHBhK0lFUU8waHhiZ1BvbzZwVElTdlZqSGh1clJlaURvd2wxckpHTDJPZU9CUT09Cg==",
-    "notes":  "Rilis perdana POS TOKO v0.1.0"
+    "url":  "https://github.com/Nando-Alhasanain/POS/releases/download/v0.1.1/POS.TOKO_0.1.1_x64-setup.exe",
+    "pub_date":  "2026-07-12T12:48:08Z",
+    "version":  "0.1.1",
+    "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRTEM0ZWU5Q1krN1V5d3lBYkd6VEMwS3gzNnREMHAyMDhpeEVmYjd3emRyMjQzUzlST3NqRWp4TXg4Um9lS0J5aWNIMTZpdVA2UVhIcjRrNUpoOEw5MjZkQXF2bDRQTnc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzODM1MjYwCWZpbGU6UE9TIFRPS09fMC4xLjFfeDY0LXNldHVwLmV4ZQpabS9ZZjJManBiUE54SmdTV2NjNHFZMExSUmhMSjZrZENNUHBDcTVmQzVKSG5nR0g5Tk9lLzBzdFBqYUs1QW1iSk4rQ0N6TFdYR0Q3M1BqSmlpdG9EQT09Cg==",
+    "notes":  "POS TOKO v0.1.1: tambah tombol Lihat/Sembunyikan password di halaman setup awal."
 }

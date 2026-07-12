@@ -15,6 +15,7 @@ export function SetupPage({ onComplete }: SetupPageProps) {
   const [adminName, setAdminName] = useState('Admin Toko')
   const [username, setUsername] = useState('admin')
   const [password, setPassword] = useState('admin123')
+  const [showPassword, setShowPassword] = useState(false)
   const { showToast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -66,7 +67,17 @@ export function SetupPage({ onComplete }: SetupPageProps) {
             </label>
             <label>
               Password
-              <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+              <div className="password-field">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete="new-password"
+                />
+                <button type="button" onClick={() => setShowPassword((current) => !current)} aria-label={showPassword ? 'Sembunyikan password' : 'Lihat password'}>
+                  <span>{showPassword ? 'Sembunyikan' : 'Lihat'}</span>
+                </button>
+              </div>
             </label>
           </div>
           <Button type="submit" size="lg" disabled={!storeName || !adminName || !username || password.length < 4 || isSubmitting}>
