@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+import { getVersion } from '@tauri-apps/api/app'
 import {
   BarChart3,
   Boxes,
@@ -13,6 +15,8 @@ import {
 } from 'lucide-react'
 import type { AppUser, PageKey, StoreSettings, UserRole } from '../types/pos'
 import logoKasir from '../../logo kasir.png'
+
+const fallbackAppVersion = '0.1.1'
 
 type MenuItem = {
   key: PageKey
@@ -44,9 +48,16 @@ type AppShellProps = {
 }
 
 export function AppShell({ currentPage, user, storeSettings, onNavigate, onLogout, children }: AppShellProps) {
+  const [appVersion, setAppVersion] = useState(fallbackAppVersion)
   const visibleItems = menuItems.filter((item) => item.roles.includes(user.role))
   const roleLabel = user.role === 'admin' ? 'Admin' : 'Kasir'
   const userInitial = user.name.trim().slice(0, 1).toUpperCase() || roleLabel.slice(0, 1)
+
+  useEffect(() => {
+    getVersion()
+      .then(setAppVersion)
+      .catch(() => setAppVersion(fallbackAppVersion))
+  }, [])
 
   return (
     <div className="app-shell">
@@ -88,6 +99,7 @@ export function AppShell({ currentPage, user, storeSettings, onNavigate, onLogou
               <LogOut size={17} strokeWidth={2.5} />
             </button>
           </div>
+          <div className="app-version" title={`Versi aplikasi ${appVersion}`}>Versi {appVersion}</div>
         </div>
       </aside>
 

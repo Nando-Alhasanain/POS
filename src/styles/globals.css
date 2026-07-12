@@ -511,6 +511,14 @@ h2 {
   color: rgba(255, 255, 255, 0.72);
 }
 
+.app-version {
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
 .profile-avatar {
   display: grid;
   width: 42px;
