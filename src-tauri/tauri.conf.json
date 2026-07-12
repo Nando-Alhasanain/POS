@@ -42,9 +42,9 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://github.com/USERNAME/REPO/releases/latest/download/update.json"
+        "https://github.com/Nando-Alhasanain/POS/releases/latest/download/update.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQzRTRBRTNBMjFEMjUyMEEKUldRS1V0SWhPcTdrUTNwOEp6ZnUrODd6cFcwVFkzWTY5bU9MVm5QdWs0eDlmMjA0YjJPMlZDMFMK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVEM0UyNkY0OUU4NzBCMEIKUldRTEM0ZWU5Q1krN2VPaHUvWThGQjVoT1NLVjlZVUFQS0FmelNhWWg0UEVFakJ5VDAxa3YxdEkK"
     }
   }
 }
