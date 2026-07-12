@@ -23,13 +23,12 @@ export function ReceiptPreview({ sale, settings }: ReceiptPreviewProps) {
     <div className="receipt-preview">
       {receiptLogoSrc ? <img className="receipt-logo" src={receiptLogoSrc} alt="Logo toko" /> : null}
       <strong>{settings.storeName}</strong>
-      <span>{settings.storeAddress}</span>
-      <span>Telp: {settings.storePhone}</span>
+      {settings.storeAddress.trim() ? <span>{settings.storeAddress}</span> : null}
+      {settings.storePhone.trim() ? <span>Telp: {settings.storePhone}</span> : null}
       <hr />
-      <span>Invoice: {sale.invoiceNumber}</span>
-      <span>Tanggal: {formatDateTime(sale.createdAt)}</span>
-      <span>Kasir: {sale.cashierName}</span>
-      <span>Pembayaran: {paymentMethodLabels[sale.paymentMethod] ?? sale.paymentMethod}</span>
+      <div className="receipt-line compact"><span>Inv: {sale.invoiceNumber}</span><span>{formatDateTime(sale.createdAt)}</span></div>
+      <div className="receipt-line compact"><span>Kasir: {sale.cashierName}</span><span>Bayar: {paymentMethodLabels[sale.paymentMethod] ?? sale.paymentMethod}</span></div>
+      {sale.customerName?.trim() ? <span>Customer: {sale.customerName}</span> : null}
       <hr />
       {sale.items.map((item) => (
         <div className="receipt-item" key={item.id}>

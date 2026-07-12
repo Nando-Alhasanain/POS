@@ -9,9 +9,9 @@ type SetupPageProps = {
 }
 
 export function SetupPage({ onComplete }: SetupPageProps) {
-  const [storeName, setStoreName] = useState('TOKO MAJU JAYA')
-  const [storeAddress, setStoreAddress] = useState('Jl. Contoh No. 123, Bandung')
-  const [storePhone, setStorePhone] = useState('08123456789')
+  const [storeName, setStoreName] = useState('')
+  const [storeAddress, setStoreAddress] = useState('')
+  const [storePhone, setStorePhone] = useState('')
   const [adminName, setAdminName] = useState('Admin Toko')
   const [username, setUsername] = useState('admin')
   const [password, setPassword] = useState('admin123')
@@ -46,15 +46,15 @@ export function SetupPage({ onComplete }: SetupPageProps) {
         <form className="form-grid" onSubmit={handleSubmit}>
           <label>
             Nama toko
-            <input value={storeName} onChange={(event) => setStoreName(event.target.value)} />
+            <input value={storeName} onChange={(event) => setStoreName(event.target.value)} placeholder="Contoh: Toko Sumber Rezeki" />
           </label>
           <label>
             Alamat toko
-            <textarea value={storeAddress} onChange={(event) => setStoreAddress(event.target.value)} rows={3} />
+            <textarea value={storeAddress} onChange={(event) => setStoreAddress(event.target.value)} placeholder="Alamat toko" rows={3} />
           </label>
           <label>
             Telepon toko
-            <input value={storePhone} onChange={(event) => setStorePhone(event.target.value)} />
+            <input value={storePhone} onChange={(event) => setStorePhone(event.target.value)} placeholder="Nomor telepon toko" />
           </label>
           <label>
             Nama admin

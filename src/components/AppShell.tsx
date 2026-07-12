@@ -47,7 +47,7 @@ type AppShellProps = {
   children: React.ReactNode
 }
 
-export function AppShell({ currentPage, user, storeSettings, onNavigate, onLogout, children }: AppShellProps) {
+export function AppShell({ currentPage, user, onNavigate, onLogout, children }: AppShellProps) {
   const [appVersion, setAppVersion] = useState(fallbackAppVersion)
   const visibleItems = menuItems.filter((item) => item.roles.includes(user.role))
   const roleLabel = user.role === 'admin' ? 'Admin' : 'Kasir'
@@ -106,7 +106,6 @@ export function AppShell({ currentPage, user, storeSettings, onNavigate, onLogou
       <main className="main-area">
         <header className="topbar">
           <div>
-            <span className="eyebrow">{storeSettings.storeName || 'POS TOKO'}</span>
             <h1>{visibleItems.find((item) => item.key === currentPage)?.label ?? 'POS TOKO'}</h1>
           </div>
         </header>

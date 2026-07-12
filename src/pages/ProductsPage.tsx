@@ -122,6 +122,7 @@ export function ProductsPage() {
   const [unitRows, setUnitRows] = useState<Unit[]>([])
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('all')
+  const [sortBy, setSortBy] = useState('name-asc')
   const [form, setForm] = useState<ProductForm>(createEmptyForm())
   const [isFormOpen, setIsFormOpen] = useState(false)
   const { showToast } = useToast()
@@ -223,12 +224,36 @@ export function ProductsPage() {
 
   const filteredProducts = useMemo(() => {
     const normalized = query.toLowerCase().trim()
-    return productRows.filter((product) => {
-      const matchesQuery = !normalized || product.name.toLowerCase().includes(normalized) || product.sku.toLowerCase().includes(normalized)
-      const matchesCategory = category === 'all' || product.categoryId === category
-      return matchesQuery && matchesCategory
-    })
-  }, [category, productRows, query])
+    return productRows
+      .filter((product) => {
+        const matchesQuery = !normalized || product.name.toLowerCase().includes(normalized) || product.sku.toLowerCase().includes(normalized)
+        const matchesCategory = category === 'all' || product.categoryId === category
+        return matchesQuery && matchesCategory
+      })
+      .sort((left, right) => {
+        switch (sortBy) {
+          case 'name-desc':
+            return right.name.localeCompare(left.name, 'id')
+          case 'sku-asc':
+            return (left.sku || '').localeCompare(right.sku || '', 'id')
+          case 'stock-asc':
+            return left.stockBase - right.stockBase
+          case 'stock-desc':
+            return right.stockBase - left.stockBase
+          case 'price-asc':
+            return left.defaultSellingPriceBase - right.defaultSellingPriceBase
+          case 'price-desc':
+            return right.defaultSellingPriceBase - left.defaultSellingPriceBase
+          case 'active-first':
+            return Number(right.isActive) - Number(left.isActive)
+          case 'inactive-first':
+            return Number(left.isActive) - Number(right.isActive)
+          case 'name-asc':
+          default:
+            return left.name.localeCompare(right.name, 'id')
+        }
+      })
+  }, [category, productRows, query, sortBy])
 
   function resetForm() {
     setForm(createEmptyForm(unitRows[0]?.id ?? ''))
@@ -464,7 +489,21 @@ export function ProductsPage() {
               ...categoryRows.map((item) => ({ value: item.id, label: item.name })),
             ]}
           />
-          <Button type="button" variant="secondary">Import CSV</Button>
+          <Dropdown
+            value={sortBy}
+            onValueChange={setSortBy}
+            options={[
+              { value: 'name-asc', label: 'Urut: Nama A-Z' },
+              { value: 'name-desc', label: 'Urut: Nama Z-A' },
+              { value: 'sku-asc', label: 'Urut: SKU A-Z' },
+              { value: 'stock-asc', label: 'Urut: Stok paling sedikit' },
+              { value: 'stock-desc', label: 'Urut: Stok paling banyak' },
+              { value: 'price-asc', label: 'Urut: Harga termurah' },
+              { value: 'price-desc', label: 'Urut: Harga termahal' },
+              { value: 'active-first', label: 'Urut: Aktif dulu' },
+              { value: 'inactive-first', label: 'Urut: Nonaktif dulu' },
+            ]}
+          />
         </div>
 
         <DataTable<Product>

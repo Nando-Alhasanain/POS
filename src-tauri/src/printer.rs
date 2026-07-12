@@ -159,13 +159,18 @@ pub fn build_receipt(settings: &StoreSettingsDto, sale: &SaleDto) -> Vec<u8> {
     }
     out.align_left();
     out.separator(width);
-    out.line(&format!("Invoice : {}", sale.invoice_number));
-    out.line(&format!("Tanggal : {}", sale.created_at));
-    out.line(&format!("Kasir   : {}", sale.cashier_name));
-    out.line(&format!(
-        "Bayar   : {}",
-        payment_method_label(&sale.payment_method)
-    ));
+    compact_pair(
+        &mut out,
+        &format!("Inv: {}", sale.invoice_number),
+        &sale.created_at,
+        width,
+    );
+    compact_pair(
+        &mut out,
+        &format!("Kasir: {}", sale.cashier_name),
+        &format!("Bayar: {}", payment_method_label(&sale.payment_method)),
+        width,
+    );
     if let Some(customer) = &sale.customer_name {
         if !customer.trim().is_empty() {
             out.line(&format!("Customer: {customer}"));
@@ -199,9 +204,18 @@ pub fn build_receipt(settings: &StoreSettingsDto, sale: &SaleDto) -> Vec<u8> {
     if !settings.receipt_footer.trim().is_empty() {
         out.wrapped_center(&settings.receipt_footer, width);
     }
-    out.feed(4);
+    out.feed(2);
     out.cut();
     out.into_bytes()
+}
+
+fn compact_pair(out: &mut EscPos, left: &str, right: &str, width: usize) {
+    if char_count(left) + 1 + char_count(right) <= width {
+        out.two_columns(left, right, width);
+    } else {
+        out.line(left);
+        out.line(right);
+    }
 }
 
 fn paper_width(settings: &StoreSettingsDto) -> usize {
@@ -433,7 +447,6 @@ impl EscPos {
 
         self.align_center();
         self.bytes.extend_from_slice(&raster);
-        self.feed(1);
     }
 
     fn line(&mut self, value: &str) {

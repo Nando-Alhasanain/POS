@@ -97,20 +97,8 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
         }
       })
 
-    function handleGlobalKey(event: KeyboardEvent) {
-      if (event.key === 'F2') {
-        event.preventDefault()
-        if (cart.length > 0 && !hasStockError && !hasPriceError && !hasQtyError && !isPaymentOpen) {
-          openPayment()
-        }
-      }
-    }
-
-    window.addEventListener('keydown', handleGlobalKey)
-
     return () => {
       isMounted = false
-      window.removeEventListener('keydown', handleGlobalKey)
     }
   }, [])
 
@@ -218,12 +206,30 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
   const hasPriceError = cart.some((item) => item.price <= 0)
   const hasQtyError = cart.some((item) => item.qty <= 0)
 
-  function defaultProductPrice(product: Product) {
+  useEffect(() => {
+    function handleGlobalKey(event: KeyboardEvent) {
+      if (event.key !== 'F2') return
+      event.preventDefault()
+      if (cart.length > 0 && !hasStockError && !hasPriceError && !hasQtyError && !isPaymentOpen) {
+        openPayment()
+      }
+    }
+
+    window.addEventListener('keydown', handleGlobalKey)
+    return () => window.removeEventListener('keydown', handleGlobalKey)
+  }, [cart.length, hasStockError, hasPriceError, hasQtyError, isPaymentOpen])
+
+  function defaultProductPriceValue(product: Product) {
     const unit = product.units.find((item) => item.isDefault) ?? product.units[0]
-    return unit ? `${formatCurrency(unit.sellingPrice)} / ${unit.unitName}` : 'Harga belum diatur'
+    return unit ? formatCurrency(unit.sellingPrice) : '-'
   }
 
   function addProduct(product: Product, unitId?: string) {
+    if (product.stockBase <= 0) {
+      showToast(`Stok ${product.name} habis.`, 'error')
+      return
+    }
+
     const nextItem = makeCartItem(product, unitId)
     if (!nextItem) {
       setCheckoutError('Produk belum memiliki satuan jual.')
@@ -366,7 +372,7 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
   return (
     <div className="sales-layout">
       <section className="sales-left">
-        <Card>
+        <Card className="sales-product-card">
           <div className="search-panel">
             <label>
               Cari / scan produk
@@ -403,19 +409,28 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
             {filteredProducts.length === 0 ? <div className="empty-state wide-card">Produk aktif belum tersedia.</div> : null}
             {filteredProducts.map((product) => {
               const imageSrc = productImageSrc(product.imagePath)
+              const isLowStock = product.stockBase <= product.minimumStock
+              const isOutOfStock = product.stockBase <= 0
               return (
-                <button className="product-pick" key={product.id} type="button" onClick={() => addProduct(product)}>
-                  <div className="product-pick-main">
-                    <div className="product-thumb compact-thumb">
-                      {imageSrc ? <img src={imageSrc} alt={product.name} /> : <span>{productInitial(product.name)}</span>}
-                    </div>
-                    <div>
-                      <strong>{product.name}</strong>
-                      <span>{product.sku || '-'} - {product.categoryName}</span>
-                      <span>{defaultProductPrice(product)} · Stok {formatQuantity(product.stockBase)} {product.baseUnitName}</span>
+                <button
+                  className={isOutOfStock ? 'product-pick is-disabled' : 'product-pick'}
+                  disabled={isOutOfStock}
+                  key={product.id}
+                  title={product.name}
+                  type="button"
+                  onClick={() => addProduct(product)}
+                >
+                  <div className="product-thumb compact-thumb">
+                    {imageSrc ? <img src={imageSrc} alt={product.name} loading="lazy" /> : <span>{productInitial(product.name)}</span>}
+                  </div>
+                  {(isOutOfStock || isLowStock) ? <span className={isOutOfStock ? 'product-pick-alert danger' : 'product-pick-alert'}>{isOutOfStock ? 'Habis' : 'Rendah'}</span> : null}
+                  <div className="product-pick-body">
+                    <strong>{product.name}</strong>
+                    <div className="product-pick-footer">
+                      <span>{product.sku || `Stok ${formatQuantity(product.stockBase)} ${product.baseUnitName}`}</span>
+                      <b>{defaultProductPriceValue(product)}</b>
                     </div>
                   </div>
-                  {product.stockBase <= product.minimumStock ? <span className="product-pick-alert">Rendah</span> : null}
                 </button>
               )
             })}
