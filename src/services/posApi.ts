@@ -406,7 +406,11 @@ export const posApi = {
 
   async saveProduct(input: SaveProductInput) {
     const result = await invokeRequired<Product>('save_product', { input }, () => {
-      const product = productFromInput(input)
+      const existingProduct = input.id ? fallbackProducts.find((item) => item.id === input.id) : undefined
+      const product = {
+        ...productFromInput(input),
+        stockBase: existingProduct?.stockBase ?? input.stockBase,
+      }
       fallbackProducts = input.id
         ? fallbackProducts.map((item) => (item.id === input.id ? product : item))
         : [product, ...fallbackProducts]
@@ -523,7 +527,10 @@ export const posApi = {
       })
 
       const totalGross = saleItems.reduce((sum, item) => sum + item.subtotal, 0)
-      const totalNet = Math.max(0, totalGross - input.discount)
+      if (input.discount > totalGross) {
+        throw new Error('Diskon tidak boleh lebih besar dari subtotal transaksi.')
+      }
+      const totalNet = totalGross - input.discount
       if (input.paidAmount < totalNet) {
         throw new Error('Nominal bayar kurang dari total transaksi.')
       }

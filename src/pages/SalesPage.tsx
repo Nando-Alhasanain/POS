@@ -68,6 +68,7 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
   const [isReceiptOpen, setIsReceiptOpen] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH')
   const [paidAmount, setPaidAmount] = useState<number | undefined>(undefined)
+  const [discount, setDiscount] = useState(0)
   const [customerName, setCustomerName] = useState('Umum')
   const [receiptSale, setReceiptSale] = useState<Sale | undefined>(latestSale)
   const { showToast } = useToast()
@@ -190,7 +191,9 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
       .slice(0, 30)
   }, [productRows, query, categoryFilter, sortBy])
 
-  const total = cart.reduce((sum, item) => sum + item.qty * item.price, 0)
+  const subtotal = cart.reduce((sum, item) => sum + item.qty * item.price, 0)
+  const hasDiscountError = discount < 0 || discount > subtotal
+  const total = Math.max(0, subtotal - discount)
   const paidAmountValue = paidAmount ?? 0
   const isPaidAmountFilled = paidAmount !== undefined
   const isPaymentInsufficient = !isPaidAmountFilled || paidAmountValue < total
@@ -284,8 +287,16 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
 
   function openPayment() {
     setPaidAmount(undefined)
+    setDiscount(0)
     setCheckoutError('')
     setIsPaymentOpen(true)
+  }
+
+  function closePayment() {
+    setIsPaymentOpen(false)
+    setPaidAmount(undefined)
+    setDiscount(0)
+    setCheckoutError('')
   }
 
   function addPaidAmountShortcut(amount: number) {
@@ -293,7 +304,7 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
   }
 
   async function completeSale() {
-    if (cart.length === 0 || isPaymentInsufficient || hasStockError || hasPriceError || hasQtyError) return
+    if (cart.length === 0 || isPaymentInsufficient || hasDiscountError || hasStockError || hasPriceError || hasQtyError) return
 
     setCheckoutError('')
     setIsCheckoutSubmitting(true)
@@ -304,7 +315,7 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
         customerName,
         paymentMethod,
         paidAmount: paidAmountValue,
-        discount: 0,
+        discount,
         items: cart.map((item) => ({
           productId: item.productId,
           productUnitId: item.selectedUnitId,
@@ -317,6 +328,7 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
       setIsReceiptOpen(true)
       setCart([])
       setPaidAmount(undefined)
+      setDiscount(0)
       setIsPaymentOpen(false)
       const [nextProducts] = await loadCatalog()
       setProductRows(nextProducts)
@@ -464,21 +476,23 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
                     <strong>{item.productName}</strong>
                     <button type="button" onClick={() => removeItem(item.id)}>Hapus</button>
                   </div>
-                  <div className="cart-controls">
-                    <NumberInput min="0" step={quantityStep(item.unitName)} value={item.qty} onValueChange={(value) => updateQty(item.id, value)} />
-                    <Dropdown
-                      value={item.selectedUnitId}
-                      onValueChange={(value) => updateUnit(item.id, item.productId, value)}
-                      options={product?.units.map((unit) => ({ value: unit.id, label: unit.unitName })) ?? []}
-                    />
+                  <div className="cart-item-main">
+                    <div className="cart-controls">
+                      <NumberInput min="0" step={quantityStep(item.unitName)} value={item.qty} onValueChange={(value) => updateQty(item.id, value)} />
+                      <Dropdown
+                        value={item.selectedUnitId}
+                        onValueChange={(value) => updateUnit(item.id, item.productId, value)}
+                        options={product?.units.map((unit) => ({ value: unit.id, label: unit.unitName })) ?? []}
+                      />
+                    </div>
+                    <b className="cart-item-subtotal">{formatCurrency(item.qty * item.price)}</b>
                   </div>
                   <div className="cart-meta">
                     <span>{formatQuantity(item.qty * item.conversionToBase)} {item.baseUnitName}</span>
-                    <span>{formatCurrency(item.price)}</span>
+                    <span>{formatCurrency(item.price)} / {item.unitName}</span>
                   </div>
                   {stockError ? <div className="inline-error">Total item produk ini melebihi stok. Tersedia {formatQuantity(productStockBase)} {item.baseUnitName}.</div> : null}
                   {item.price <= 0 ? <div className="inline-error">Harga jual satuan ini belum diatur.</div> : null}
-                  <b>{formatCurrency(item.qty * item.price)}</b>
                 </div>
               )
             })
@@ -495,7 +509,7 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
         </div>
       </aside>
 
-      <Modal title="Pembayaran" open={isPaymentOpen} onClose={() => setIsPaymentOpen(false)}>
+      <Modal title="Pembayaran" open={isPaymentOpen} onClose={closePayment}>
         <div className="payment-grid">
           <label>
             Nama pelanggan
@@ -526,16 +540,25 @@ export function SalesPage({ user, latestSale, onCompleteSale }: SalesPageProps) 
               Reset
             </button>
           </div>
+          <label>
+            Diskon
+            <NumberInput min="0" value={discount} onValueChange={setDiscount} placeholder="Masukkan nominal diskon" />
+          </label>
           <div className="payment-summary">
+            <span>Subtotal</span>
+            <strong>{formatCurrency(subtotal)}</strong>
+            <span>Diskon</span>
+            <strong>{formatCurrency(discount)}</strong>
             <span>Total</span>
             <strong>{formatCurrency(total)}</strong>
             <span>Kembali</span>
             <strong>{formatCurrency(change)}</strong>
           </div>
           {!isPaidAmountFilled ? <div className="error-box">Nominal bayar wajib diisi.</div> : null}
+          {hasDiscountError ? <div className="error-box">Diskon tidak boleh lebih besar dari subtotal transaksi.</div> : null}
           {isPaidAmountFilled && paidAmountValue < total ? <div className="error-box">Nominal bayar kurang dari total transaksi.</div> : null}
           {checkoutError ? <div className="error-box">{checkoutError}</div> : null}
-          <Button type="button" size="lg" onClick={completeSale} disabled={isPaymentInsufficient || hasStockError || hasPriceError || hasQtyError || isCheckoutSubmitting}>
+          <Button type="button" size="lg" onClick={completeSale} disabled={isPaymentInsufficient || hasDiscountError || hasStockError || hasPriceError || hasQtyError || isCheckoutSubmitting}>
             {isCheckoutSubmitting ? 'Menyimpan...' : 'Simpan transaksi'}
           </Button>
         </div>

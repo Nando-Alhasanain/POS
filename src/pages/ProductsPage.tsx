@@ -609,8 +609,17 @@ export function ProductsPage() {
                 ]}
               />
             </label>
-            <label>Stok awal/dasar<NumberInput step={quantityStep(unitRows.find((unit) => unit.id === form.baseUnitId)?.symbol)} value={form.stockBase} onValueChange={(value) => updateForm('stockBase', value)} /></label>
+            <label>
+              {form.id ? 'Stok saat ini' : 'Stok awal/dasar'}
+              <NumberInput
+                disabled={Boolean(form.id)}
+                step={quantityStep(unitRows.find((unit) => unit.id === form.baseUnitId)?.symbol)}
+                value={form.stockBase}
+                onValueChange={(value) => updateForm('stockBase', value)}
+              />
+            </label>
           </div>
+          {form.id ? <p className="form-field-note">Perubahan stok produk yang sudah dibuat harus melalui halaman Stok.</p> : null}
           <div className="three-columns">
             <label>Harga modal dasar<NumberInput value={form.purchasePriceBase} onValueChange={(value) => updateForm('purchasePriceBase', value)} /></label>
             <label>Harga jual dasar<NumberInput value={form.defaultSellingPriceBase} onValueChange={updateDefaultSellingPrice} /></label>
@@ -652,7 +661,9 @@ export function ProductsPage() {
                       value={unitRow.unitId}
                       onValueChange={(value) => updateUnitRow(unitRow.rowId, { unitId: value })}
                       options={unitRows.map((unit) => ({ value: unit.id, label: unit.symbol }))}
+                      disabled={isBaseUnit}
                     />
+                    {isBaseUnit ? <span className="unit-field-helper">Ubah satuan dasar dari field Satuan dasar di atas.</span> : null}
                   </label>
                   {isBaseUnit ? (
                     <label className="unit-field">

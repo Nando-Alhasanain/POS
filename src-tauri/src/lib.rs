@@ -669,7 +669,7 @@ fn save_product(app: AppHandle, input: SaveProductInput) -> CommandResult<Produc
             sku = excluded.sku,
             category_id = excluded.category_id,
             base_unit_id = excluded.base_unit_id,
-            stock_base = excluded.stock_base,
+            stock_base = products.stock_base,
             minimum_stock = excluded.minimum_stock,
             purchase_price_base = excluded.purchase_price_base,
             default_selling_price_base = excluded.default_selling_price_base,
@@ -1216,7 +1216,11 @@ fn complete_sale(app: AppHandle, input: CompleteSaleInput) -> CommandResult<Sale
         });
     }
 
-    let total_net = (total_gross - input.discount).max(0.0);
+    if input.discount > total_gross {
+        return Err("Diskon tidak boleh lebih besar dari subtotal transaksi.".to_string());
+    }
+
+    let total_net = total_gross - input.discount;
     if input.paid_amount < total_net {
         return Err("Nominal bayar kurang dari total transaksi.".to_string());
     }
