@@ -1,11 +1,11 @@
-﻿{
-  "version": "0.1.1",
-  "notes": "POS TOKO v0.1.1: tambah tombol Lihat/Sembunyikan password di halaman setup awal.",
-  "pub_date": "2026-07-12T12:48:08Z",
+{
+  "version": "0.1.2",
+  "notes": "POS TOKO v0.1.2: includes POS usability fixes, compact receipts/cart layout, safer product stock editing, payment discount support, and generated dependency cleanup.",
+  "pub_date": "2026-07-12T23:07:50Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRTEM0ZWU5Q1krN1V5d3lBYkd6VEMwS3gzNnREMHAyMDhpeEVmYjd3emRyMjQzUzlST3NqRWp4TXg4Um9lS0J5aWNIMTZpdVA2UVhIcjRrNUpoOEw5MjZkQXF2bDRQTnc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzODM1MjYwCWZpbGU6UE9TIFRPS09fMC4xLjFfeDY0LXNldHVwLmV4ZQpabS9ZZjJManBiUE54SmdTV2NjNHFZMExSUmhMSjZrZENNUHBDcTVmQzVKSG5nR0g5Tk9lLzBzdFBqYUs1QW1iSk4rQ0N6TFdYR0Q3M1BqSmlpdG9EQT09Cg==",
-      "url": "https://github.com/Nando-Alhasanain/POS/releases/download/v0.1.1/POS.TOKO_0.1.1_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRTEM0ZWU5Q1krN1Zta1lIS2x0QVpYWlpPbnRENDJXV1hXSWJDWVN1V0hBaml6eEcrRjFBamxXeE5ScWtvT3diQ05JZFhxc285UWlRUU5zTkVYSGJ0a0tGMytZQVBUR0FjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzODk3NTk1CWZpbGU6UE9TIFRPS09fMC4xLjJfeDY0LXNldHVwLmV4ZQowSFVYZmFNQVRaaC8zcGhKVFY4SEY5ZFZiTFN4RGo5YUppbGtJaTRFOHU3aXNHSzBqY1l0ZVh6ZnQwRitrQ3EwbGIyNitGZGdyTVIyaDExbno5ZTVCdz09Cg==",
+      "url": "https://github.com/Nando-Alhasanain/POS/releases/download/v0.1.2/POS.TOKO_0.1.2_x64-setup.exe"
     }
   }
 }
