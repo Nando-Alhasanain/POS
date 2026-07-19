@@ -1,6 +1,6 @@
 [package]
 name = "pos_toko"
-version = "0.1.2"
+version = "0.1.3"
 description = "POS TOKO offline desktop app"
 authors = ["POS TOKO"]
 edition = "2021"
