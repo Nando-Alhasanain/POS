@@ -12,7 +12,8 @@ use models::{
     SaveUnitInput, SaveUserInput, SetUserActiveInput, SetupStatusDto, StockAdjustmentInput,
     StockInInput, StockMovementDto, StoreSettingsDto, UnitDto, UserAccountDto, UserDto,
 };
-use rusqlite::{params, Connection};
+use rusqlite::{params, Connection, OptionalExtension};
+use std::collections::HashSet;
 use std::fs;
 use std::path::{Component, Path, PathBuf};
 use tauri::AppHandle;
@@ -693,6 +694,7 @@ fn save_product(app: AppHandle, input: SaveProductInput) -> CommandResult<Produc
     .map_err(map_sql_error)?;
 
     let units = normalized_product_units(&input);
+    validate_product_barcodes(&tx, &product_id, &units)?;
 
     let incoming_ids: Vec<String> = units.iter().filter_map(|unit| unit.id.clone()).collect();
 
@@ -1000,6 +1002,48 @@ fn validate_product_input(input: &SaveProductInput) -> CommandResult<()> {
             return Err("Harga jual tidak boleh negatif.".to_string());
         }
     }
+    Ok(())
+}
+
+fn validate_product_barcodes(
+    tx: &rusqlite::Transaction<'_>,
+    product_id: &str,
+    units: &[SaveProductUnitInput],
+) -> CommandResult<()> {
+    let mut seen = HashSet::new();
+
+    for unit in units {
+        let Some(barcode) = normalize_optional(unit.barcode.clone()) else {
+            continue;
+        };
+
+        if !seen.insert(barcode.clone()) {
+            return Err(format!(
+                "Barcode \"{barcode}\" digunakan lebih dari sekali. Setiap satuan jual harus memiliki barcode berbeda."
+            ));
+        }
+
+        let conflict = tx
+            .query_row(
+                "SELECT p.name, COALESCE(u.symbol, pu.unit_id)
+                 FROM product_units pu
+                 JOIN products p ON p.id = pu.product_id
+                 LEFT JOIN units u ON u.id = pu.unit_id
+                 WHERE pu.barcode = ?1 AND pu.product_id <> ?2
+                 LIMIT 1",
+                params![&barcode, product_id],
+                |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
+            )
+            .optional()
+            .map_err(|error| error.to_string())?;
+
+        if let Some((product_name, unit_name)) = conflict {
+            return Err(format!(
+                "Barcode \"{barcode}\" sudah digunakan oleh produk \"{product_name}\" (satuan {unit_name}). Gunakan barcode lain."
+            ));
+        }
+    }
+
     Ok(())
 }
 
@@ -1977,7 +2021,8 @@ fn map_sql_error(error: rusqlite::Error) -> String {
     } else if message.contains("UNIQUE constraint failed: products.sku") {
         "SKU produk sudah digunakan.".to_string()
     } else if message.contains("UNIQUE constraint failed: product_units.barcode") {
-        "Barcode satuan produk sudah digunakan.".to_string()
+        "Barcode sudah digunakan oleh produk atau satuan lain. Periksa kembali kode barcode."
+            .to_string()
     } else if message.contains("FOREIGN KEY constraint failed") {
         "Data referensi tidak valid.".to_string()
     } else {

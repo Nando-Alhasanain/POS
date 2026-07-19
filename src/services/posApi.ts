@@ -146,6 +146,15 @@ function isTauriRuntime() {
   return typeof window !== 'undefined' && ('__TAURI_INTERNALS__' in window || '__TAURI__' in window)
 }
 
+function normalizeApiError(error: unknown) {
+  if (error instanceof Error) return error
+  if (typeof error === 'string') return new Error(error)
+  if (error && typeof error === 'object' && 'message' in error) {
+    return new Error(String(error.message))
+  }
+  return new Error('Terjadi kesalahan. Silakan coba lagi.')
+}
+
 async function invokeOrFallback<T>(command: string, args: Record<string, unknown>, fallback: () => T | Promise<T>): Promise<T> {
   if (!isTauriRuntime()) {
     return fallback()
@@ -154,8 +163,9 @@ async function invokeOrFallback<T>(command: string, args: Record<string, unknown
   try {
     return await invoke<T>(command, args)
   } catch (error) {
-    console.error(`Tauri command failed: ${command}`, error)
-    throw error
+    const normalizedError = normalizeApiError(error)
+    console.error(`Tauri command failed: ${command}`, normalizedError)
+    throw normalizedError
   }
 }
 
@@ -164,7 +174,11 @@ async function invokeRequired<T>(command: string, args: Record<string, unknown>,
     return fallback()
   }
 
-  return invoke<T>(command, args)
+  try {
+    return await invoke<T>(command, args)
+  } catch (error) {
+    throw normalizeApiError(error)
+  }
 }
 
 function nextId(prefix: string) {
@@ -237,6 +251,29 @@ function productFromInput(input: SaveProductInput): Product {
     isActive: input.isActive,
     imagePath: input.removeImage ? '' : input.imageDataUrl ?? input.imagePath ?? '',
     units: productUnits,
+  }
+}
+
+function validateFallbackProductBarcodes(input: SaveProductInput) {
+  const seen = new Set<string>()
+
+  for (const unit of input.units) {
+    const barcode = unit.barcode?.trim()
+    if (!barcode) continue
+
+    if (seen.has(barcode)) {
+      throw new Error(`Barcode "${barcode}" digunakan lebih dari sekali. Setiap satuan jual harus memiliki barcode berbeda.`)
+    }
+    seen.add(barcode)
+
+    const conflict = fallbackProducts
+      .filter((product) => product.id !== input.id)
+      .flatMap((product) => product.units.map((productUnit) => ({ product, productUnit })))
+      .find(({ productUnit }) => productUnit.barcode?.trim() === barcode)
+
+    if (conflict) {
+      throw new Error(`Barcode "${barcode}" sudah digunakan oleh produk "${conflict.product.name}" (satuan ${conflict.productUnit.unitName}). Gunakan barcode lain.`)
+    }
   }
 }
 
@@ -406,6 +443,7 @@ export const posApi = {
 
   async saveProduct(input: SaveProductInput) {
     const result = await invokeRequired<Product>('save_product', { input }, () => {
+      validateFallbackProductBarcodes(input)
       const existingProduct = input.id ? fallbackProducts.find((item) => item.id === input.id) : undefined
       const product = {
         ...productFromInput(input),
